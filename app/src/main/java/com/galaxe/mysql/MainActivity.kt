@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
 
             // calling method to add
             // name to our database
-        db.addPerson(db, name, age)
+        db.addPerson(name, age)
 
             // Toast to message on the screen
         Toast.makeText(this, name + " added to database", Toast.LENGTH_LONG).show()
@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
 
         val db = DatabaseHelper( this)
 
-        val cursor = db.getAllItems(db)
+        val cursor = db.getAllItems()
         Name.text = "Name\n\n"
         Age.text = "Age\n\n"
 
@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity() {
     }
     fun delete(v: View){
         val db = DatabaseHelper( this)
-        db.deleteAll(db)
+        db.deleteAll()
         refreshList(v)
     }
 }

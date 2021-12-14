@@ -32,9 +32,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         onUpgrade(db, oldVersion, newVersion)
     }
     //add, fetch, modify/update, delete
-    fun addPerson(dbh: DatabaseHelper , name: String, age: Int ){
+    fun addPerson(name: String, age: Int ){
         //open database
-        val db = dbh.writableDatabase
+        val db = this.writableDatabase
         //prepare values
         val values = ContentValues().apply{
             put(DatabaseInfo.TableInfo.COLUMN_ITEM_NAME, name)
@@ -45,7 +45,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         //close database
         db.close()
     }
-    fun getAllItems(dbh: DatabaseHelper) : Cursor {
+    fun getAllItems() : Cursor {
         val db = this.readableDatabase
         val projection = arrayOf(
             BaseColumns._ID,
@@ -59,8 +59,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return cursor
 
     }
-    fun updateItem(dbh: DatabaseHelper, oldName: String, newName: String, oldAge: Int, newAge: Int){
-        val db = dbh.writableDatabase
+    fun updateItem(oldName: String, newName: String, oldAge: Int, newAge: Int){
+        val db = this.writableDatabase
 
         val values = ContentValues().apply{
             put(DatabaseInfo.TableInfo.COLUMN_ITEM_NAME, newName)
@@ -72,15 +72,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
         val count = db.update(DatabaseInfo.TableInfo.TABLE_NAME, values, selection, selectionArgs)
     }
-    fun deleteItem(dbh: DatabaseHelper, name: String){
-        val db = dbh.writableDatabase
+    fun deleteItem(name: String){
+        val db = this.writableDatabase
         val selection = "${DatabaseInfo.TableInfo.COLUMN_ITEM_NAME} LIKE ?"
         val selectionArgs = arrayOf(name)
 
         val deletedRows = db.delete(DatabaseInfo.TableInfo.TABLE_NAME, selection, selectionArgs)
     }
-    fun deleteAll(dbh: DatabaseHelper){
-        val db = dbh.writableDatabase
+    fun deleteAll(){
+        val db = this.writableDatabase
 
         db.execSQL("delete from "+ DatabaseInfo.TableInfo.TABLE_NAME);
     }
