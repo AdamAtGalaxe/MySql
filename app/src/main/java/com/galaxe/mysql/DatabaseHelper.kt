@@ -1,5 +1,6 @@
 package com.galaxe.mysql
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
@@ -7,8 +8,10 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.provider.BaseColumns
 import android.provider.ContactsContract
+import android.widget.TextView
 
-class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION)  {
+class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+
 
     companion object{
         // here we have defined variables for our database
@@ -21,7 +24,10 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(DatabaseInfo.SQL_CREATE_TABLE_QUERY)
+
     }
+
+
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         db.execSQL(DatabaseInfo.SQL_DELETE_TABLE_QUERY)
@@ -33,20 +39,22 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     }
     //add, fetch, modify/update, delete
     fun addPerson(name: String, age: Int ){
-        //open database
-        val db = this.writableDatabase
+
+        val dbWrite = this.writableDatabase
         //prepare values
         val values = ContentValues().apply{
             put(DatabaseInfo.TableInfo.COLUMN_ITEM_NAME, name)
             put(DatabaseInfo.TableInfo.COLUMN_ITEM_AGE, age)
         }
         //store values
-        val rowID = db.insert(DatabaseInfo.TableInfo.TABLE_NAME, null, values)
+        val rowID = dbWrite.insert(DatabaseInfo.TableInfo.TABLE_NAME, null, values)
         //close database
-        db.close()
+
     }
-    fun getAllItems() : Cursor {
-        val db = this.readableDatabase
+    @SuppressLint("Range")
+    fun getAllItems(Name: TextView, Age: TextView){
+        val dbRead = this.readableDatabase
+
         val projection = arrayOf(
             BaseColumns._ID,
             DatabaseInfo.TableInfo.COLUMN_ITEM_NAME,
@@ -55,12 +63,27 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val selectionArgs = null
         val sortOrder = null
 
-        val cursor = db.query(DatabaseInfo.TableInfo.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder)
-        return cursor
+        val cursor = dbRead.query(DatabaseInfo.TableInfo.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder)
+
+        Name.text = "Name\n\n"
+        Age.text = "Age\n\n"
+
+        with(cursor){
+            while(moveToNext() ){
+                val itemName = getString(getColumnIndex(com.galaxe.mysql.DatabaseInfo.TableInfo.COLUMN_ITEM_NAME))
+                val itemAge = getInt(getColumnIndex(com.galaxe.mysql.DatabaseInfo.TableInfo.COLUMN_ITEM_AGE))
+                Name.append(itemName+"\n")
+                Age.append(itemAge.toString()+"\n")
+            }
+        }
+
+        cursor.close()
+        dbRead.close()
 
     }
     fun updateItem(oldName: String, newName: String, oldAge: Int, newAge: Int){
-        val db = this.writableDatabase
+
+        val dbWrite = this.writableDatabase
 
         val values = ContentValues().apply{
             put(DatabaseInfo.TableInfo.COLUMN_ITEM_NAME, newName)
@@ -70,22 +93,28 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val selection = "${DatabaseInfo.TableInfo.COLUMN_ITEM_NAME} LIKE ?"
         val selectionArgs = arrayOf(oldName)
 
-        val count = db.update(DatabaseInfo.TableInfo.TABLE_NAME, values, selection, selectionArgs)
+        val count = dbWrite.update(DatabaseInfo.TableInfo.TABLE_NAME, values, selection, selectionArgs)
+
     }
     fun deleteItem(name: String){
-        val db = this.writableDatabase
+
+        val dbWrite = this.writableDatabase
         val selection = "${DatabaseInfo.TableInfo.COLUMN_ITEM_NAME} LIKE ?"
         val selectionArgs = arrayOf(name)
 
-        val deletedRows = db.delete(DatabaseInfo.TableInfo.TABLE_NAME, selection, selectionArgs)
+        val deletedRows = dbWrite.delete(DatabaseInfo.TableInfo.TABLE_NAME, selection, selectionArgs)
+
     }
     fun deleteAll(){
-        val db = this.writableDatabase
 
-        db.execSQL("delete from "+ DatabaseInfo.TableInfo.TABLE_NAME);
+        val dbWrite = this.writableDatabase
+        dbWrite.execSQL("delete from "+ DatabaseInfo.TableInfo.TABLE_NAME);
+        //db.delete(DatabaseInfo.TableInfo.TABLE_NAME, null, null)
+
     }
-    fun deleteEverything(db: SQLiteDatabase){
-        db.execSQL(DatabaseInfo.SQL_DELETE_TABLE_QUERY)
+    fun deleteEverything(){
+        val dbWrite = this.writableDatabase
+        dbWrite.execSQL(DatabaseInfo.SQL_DELETE_TABLE_QUERY)
     }
 
 }

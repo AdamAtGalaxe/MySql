@@ -58,29 +58,16 @@ class MainActivity : AppCompatActivity() {
         enterAge.text.clear()
 
     }
-    @SuppressLint("Range")
     fun refreshList(v: View){
 
-        val db = DatabaseHelper( this)
+        val dbh = DatabaseHelper( this)
+        dbh.getAllItems(Name, Age)
 
-        val cursor = db.getAllItems()
-        Name.text = "Name\n\n"
-        Age.text = "Age\n\n"
-
-        with(cursor){
-            while(moveToNext() ){
-                val itemName = getString(getColumnIndex(DatabaseInfo.TableInfo.COLUMN_ITEM_NAME))
-                val itemAge = getInt(getColumnIndex(DatabaseInfo.TableInfo.COLUMN_ITEM_AGE))
-                Name.append(itemName+"\n")
-                Age.append(itemAge.toString()+"\n")
-            }
-        }
-
-        cursor.close()
     }
     fun delete(v: View){
         val db = DatabaseHelper( this)
         db.deleteAll()
+
         refreshList(v)
     }
 }
